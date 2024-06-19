@@ -15,7 +15,7 @@ class MarcaController extends Controller
         $this->marca = $marca;
     }
     /**
-     * Display a listing of the resource.
+     * Exibir uma listagem do recurso.
      *
      * @return \Illuminate\Http\Response
      */
@@ -49,6 +49,9 @@ class MarcaController extends Controller
     public function show(int $id)
     {
         $marca = $this->marca->find($id);
+        if($marca === null){
+            return ['erro' => 'Recurso pesquisado não existe'];
+        }
         return $marca;
     }
 
@@ -56,17 +59,16 @@ class MarcaController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Marca  $marca
+     * @param  Integer $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Marca $marca)
+    public function update(Request $request, $id)
     {
-        // print_r($request->all());//os dados atualizados
-        // echo '<hr>';
-        // print_r($marca->getAttributes());//os dados antigos
-
-        // $marca->update($request->all());
-        $marca = $this->marca->update($request->all());
+        $marca = $this->marca->find($id);
+        if($marca === null){
+            return ['erro' => 'Impossível realizar a atualização. O recurso solicitado não existe.'];
+        }
+        $marca->update($request->all());
         return $marca;
     }
 
@@ -79,6 +81,9 @@ class MarcaController extends Controller
     public function destroy($id)
     {
         $marca = $this->marca->find($id);
+        if($marca === null){
+            return ['erro' => 'Impossível realizar a exclusão. O recurso solicitado não existe.'];
+        }
         $marca->delete();
         return ['msg' => 'A marca foi removida com sucesso!'];
     }
