@@ -53,7 +53,7 @@ class MarcaController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  Integer
+     * @param Integer $id
      * @return \Illuminate\Http\Response
      */
     public function show(int $id)
@@ -79,7 +79,25 @@ class MarcaController extends Controller
             return response()->json(['erro' => 'Impossível realizar a atualização. O recurso solicitado não existe.'],404);
         }
 
-        $request->validate($marca->rules(), $marca->feedback());
+        if($request->method() === 'PATCH')
+        {
+            $regrasDinamicas = array();
+
+            //percorrendo todas as regras definidas no Model
+            foreach($marca->rules() as $input => $rules)
+            {
+                //coletando apenas as regras aplicáveil aos parametros parciais da requisição
+                if(array_key_exists($input, $request->all()))
+                {
+                    $regrasDinamicas[$input] = $rules;
+                }
+            }
+            $request->validate($regrasDinamicas, $marca->feedback());
+        } else
+        {
+            $request->validate($marca->rules(), $marca->feedback());
+        }
+
         $marca->update($request->all());
         return response()->json($marca,200);
     }
@@ -87,7 +105,7 @@ class MarcaController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  Integer
+     * @param  Integer $id
      * @return \Illuminate\Http\Response
      */
     public function destroy($id)
