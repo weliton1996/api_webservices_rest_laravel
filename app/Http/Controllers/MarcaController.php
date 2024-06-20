@@ -78,6 +78,8 @@ class MarcaController extends Controller
         if($marca === null){
             return response()->json(['erro' => 'Impossível realizar a atualização. O recurso solicitado não existe.'],404);
         }
+
+        $request->validate($marca->rules(), $marca->feedback());
         $marca->update($request->all());
         return response()->json($marca,200);
     }
