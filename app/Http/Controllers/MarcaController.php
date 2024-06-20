@@ -34,24 +34,36 @@ class MarcaController extends Controller
      */
     public function store(Request $request)
     {
-        // dd($request->all());
-        // $marca =  Marca::create($request->all());
-        // $regras = [
-        //     'nome' => 'required|unique:marcas',
-        //     'imagem' => 'required'
-        // ];
-        // $feedback = [
-        //     'required' => 'O campo :attribute é obrigatório!',
-        //     'nome.unique' => 'O nome da marca já existe'
-        // ];
-        // $request->validate($regras,$feedback);
+       /* teste de validate tradicional
+            dd($request->all());
+            $marca =  Marca::create($request->all());
+            $regras = [
+                'nome' => 'required|unique:marcas',
+                'imagem' => 'required'
+            ];
+            $feedback = [
+                'required' => 'O campo :attribute é obrigatório!',
+                'nome.unique' => 'O nome da marca já existe'
+            ];
+            $request->validate($regras,$feedback);
+       */
+
         $request->validate($this->marca->rules(),$this->marca->feedback());
-        // dd($request->nome);
-        // dd($request->get('nome'));
-        // dd($request->input('nome'));
-        // dd($request->imagem);
-        dd($request->file('imagem')->getClientOriginalName());
+        /*  testes de request de image
+            dd($request->nome);
+            dd($request->get('nome'));
+            dd($request->input('nome'));
+            dd($request->imagem);
+            dd($request->file('imagem')->getClientOriginalName());
+        */
+        $imagem = $request->file('imagem');
+        // $imagem->store('path', local|public);
+        $imagem->store('imagens','public');
+        dd('Upload de arquivos');
+
         // $marca =  $this->marca->create($request->all());
+
+
         return response()->json($marca,201);
     }
 
