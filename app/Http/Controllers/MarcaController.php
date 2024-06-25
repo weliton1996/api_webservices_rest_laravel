@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\Controller;
 use App\Models\Marca;
 use Illuminate\Http\Request;
@@ -23,6 +24,8 @@ class MarcaController extends Controller
     {
         // $marcas = Marca::all();
         $marca = $this->marca->all();
+        if($marca->isEmpty())return response()->json(['erro'=> 'Nenhum resultado encontrado!'],422);
+
         return response()->json($marca,200);
     }
 
@@ -119,6 +122,11 @@ class MarcaController extends Controller
             $request->validate($marca->rules(), $marca->feedback());
         }
 
+        //remove o arquivo antigo salvo no storage
+        if($request->file('imagem')) {
+            Storage::disk('public')->delete($marca->imagem);
+        }
+
         $imagem = $request->file('imagem');
         $imagem_urn = $imagem->store('imagens','public');
 
@@ -132,15 +140,21 @@ class MarcaController extends Controller
     /**
      * Remove the specified resource from storage.
      *
+     * @param Request $request
      * @param  Integer $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Request $request, int $id)
     {
         $marca = $this->marca->find($id);
+
         if($marca === null){
             return response()->json(['erro' => 'Impossível realizar a exclusão. O recurso solicitado não existe.'],404);
         }
+
+        //remove o arquivo salvo no storage
+        Storage::disk('public')->delete($marca->imagem);
+
         $marca->delete();
         return response()->json(['msg' => 'A marca foi removida com sucesso!'],200);
     }
