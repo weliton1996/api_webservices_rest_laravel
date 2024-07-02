@@ -24,7 +24,7 @@ class Marca extends Model
          */
     }
 
-    public function feedback(){
+    public function messages(){
         return [
             'required' => 'O campo :attribute é obrigatório!',
             'nome.unique' => 'O nome da marca já existe.',

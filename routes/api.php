@@ -27,6 +27,6 @@ Route::apiResource('cliente', 'ClienteController');
 Route::apiResource('carro', 'CarroController');
 Route::apiResource('locacao', 'LocacaoController');
 Route::apiResource('marca', 'MarcaController');
-Route::apiResource('Modelo', 'ModeloController');
+Route::apiResource('modelo', 'ModeloController');
 
 

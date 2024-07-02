@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 
 class MarcaController extends Controller
 {
-    protected $marca;
+    protected Marca $marca;
 
     public function __construct(Marca $marca)
     {
@@ -44,14 +44,14 @@ class MarcaController extends Controller
                 'nome' => 'required|unique:marcas',
                 'imagem' => 'required'
             ];
-            $feedback = [
+            $messages = [
                 'required' => 'O campo :attribute é obrigatório!',
                 'nome.unique' => 'O nome da marca já existe'
             ];
-            $request->validate($regras,$feedback);
+            $request->validate($regras,$messages);
        */
 
-        $request->validate($this->marca->rules(),$this->marca->feedback());
+        $request->validate($this->marca->rules(),$this->marca->messages());
         /*  testes de request de image
             dd($request->nome);
             dd($request->get('nome'));
@@ -75,7 +75,7 @@ class MarcaController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param Integer $id
+     * @param int $id
      * @return \Illuminate\Http\Response
      */
     public function show(int $id)
@@ -91,7 +91,7 @@ class MarcaController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  Integer $id
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
@@ -116,10 +116,10 @@ class MarcaController extends Controller
                     $regrasDinamicas[$input] = $rules;
                 }
             }
-            $request->validate($regrasDinamicas, $marca->feedback());
+            $request->validate($regrasDinamicas, $marca->messages());
         } else
         {
-            $request->validate($marca->rules(), $marca->feedback());
+            $request->validate($marca->rules(), $marca->messages());
         }
 
         //remove o arquivo antigo salvo no storage
@@ -141,7 +141,7 @@ class MarcaController extends Controller
      * Remove the specified resource from storage.
      *
      * @param Request $request
-     * @param  Integer $id
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
     public function destroy(Request $request, int $id)
