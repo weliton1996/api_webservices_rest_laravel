@@ -17,7 +17,7 @@ class CreateModelosTable extends Migration
             $table->id();
             $table->unsignedBigInteger('marca_id');
             $table->string('nome',30);
-            $table->string('imagem',30);
+            $table->string('imagem',100);
             $table->integer('numero_portas');
             $table->integer('lugares');
             $table->boolean('air_bag');
