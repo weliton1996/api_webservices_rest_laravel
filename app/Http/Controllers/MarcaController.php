@@ -20,13 +20,38 @@ class MarcaController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        // $marcas = Marca::all();
-        $marca = $this->marca->with('modelos')->get();
-        if($marca->isEmpty())return response()->json(['erro'=> 'Nenhum resultado encontrado!'],422);
+        $marcas = [];
 
-        return response()->json($marca,200);
+        if($request->has('atributos_modelo')){
+            $atributos_modelo = $request->atributos_modelo;
+            $marcas = $this->marca->with('modelos:id,'.$atributos_modelo);
+        } else {
+            $marcas = $this->marca->with('modelos');
+        }
+
+        if($request->has('filtro')){
+            $filtros = explode(';',$request->filtro);
+            foreach($filtros as $key => $condicao){
+                $parametros = explode(':',$condicao);
+                $marcas = $marcas->where($parametros[0], $parametros[1], $parametros[2]);
+            }
+
+        }
+
+        if($request->has('atributos')){
+            $atributos = $request->atributos;
+            $marcas = $marcas->selectRaw($atributos)->get();
+        } else {
+            $marcas = $marcas->get();
+        }
+
+        if(!$marcas->count()>0){
+            return response()->json(['erro' => 'Nenhum resultado encontrado!'], 404);
+        }
+
+        return response()->json($marcas,200);
     }
 
     /**
