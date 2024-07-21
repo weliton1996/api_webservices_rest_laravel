@@ -124,8 +124,9 @@ class ModeloController extends Controller
                 $imagem = $request->file('imagem');
                 $imagem_urn = $imagem->store('imagens/modelos','public');
                 $modelo->imagem = $imagem_urn;
-                $modelo->save();
             }
+
+            $modelo->save();
 
         } else {
             $request->validate($modelo->rules(), $modelo->messages());
