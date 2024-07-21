@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\Controller;
 use App\Models\Modelo;
 use Illuminate\Http\Request;
+use PHPUnit\Framework\Constraint\IsEmpty;
 
 class ModeloController extends Controller
 {
@@ -36,8 +37,12 @@ class ModeloController extends Controller
         }
 
         if($request->has('filtro')){
-            $condicoes = explode(':',$request->filtro);
-            $modelos = $modelos->where($condicoes[0], $condicoes[1], $condicoes[2]);
+            $filtros = explode(';',$request->filtro);
+            foreach($filtros as $key => $condicao){
+                $parametros = explode(':',$condicao);
+                $modelos = $modelos->where($parametros[0], $parametros[1], $parametros[2]);
+            }
+
         }
 
         if($request->has('atributos')){
@@ -45,6 +50,10 @@ class ModeloController extends Controller
             $modelos = $modelos->selectRaw($atributos)->get();
         } else {
             $modelos = $modelos->get();
+        }
+
+        if(!$modelos->count()>0){
+            return response()->json(['erro' => 'Nenhum resultado encontrado!'], 404);
         }
         return response()->json($modelos,200);
     }
