@@ -101,7 +101,7 @@ class ModeloController extends Controller
             }
             $request->validate($regrasDinamicas, $modelo->messages());
 
-            $modelo->update($request->all());
+            $modelo->fill($request->all());
 
             if($request->file('imagem')) {
                 Storage::disk('public')->delete($modelo->imagem);
@@ -109,6 +109,7 @@ class ModeloController extends Controller
                 $imagem = $request->file('imagem');
                 $imagem_urn = $imagem->store('imagens/modelos','public');
                 $modelo->imagem = $imagem_urn;
+                $modelo->save();
             }
 
         } else {
@@ -123,7 +124,6 @@ class ModeloController extends Controller
                 $imagem_urn = $imagem->store('imagens/modelos','public');
                 $modelo->imagem = $imagem_urn;
             }
-            $modelo->save();
         }
 
         return response()->json($modelo,200);
