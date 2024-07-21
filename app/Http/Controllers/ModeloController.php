@@ -26,7 +26,7 @@ class ModeloController extends Controller
      */
     public function index()
     {
-        return response()->json($this->modelo->all(),200);
+        return response()->json($this->modelo->with('marca')->get(),200);
     }
 
 
@@ -64,7 +64,7 @@ class ModeloController extends Controller
      */
     public function show(int $id)
     {
-        $modelo = $this->modelo->find($id);
+        $modelo = $this->modelo->with('marca')->find($id);
         if($modelo === null){
             return response()->json(['erro' => 'Recurso pesquisado não existe'], 404);
         }
@@ -88,7 +88,7 @@ class ModeloController extends Controller
 
         if($request->method() === 'PATCH')
         {
-            $regrasDinamicas = array();
+            $regrasDinamicas = [];
 
             //percorrendo todas as regras definidas no Model
             foreach($modelo->rules() as $input => $rules)
@@ -100,28 +100,32 @@ class ModeloController extends Controller
                 }
             }
             $request->validate($regrasDinamicas, $modelo->messages());
-        } else
-        {
+
+            $modelo->update($request->all());
+
+            if($request->file('imagem')) {
+                Storage::disk('public')->delete($modelo->imagem);
+
+                $imagem = $request->file('imagem');
+                $imagem_urn = $imagem->store('imagens/modelos','public');
+                $modelo->imagem = $imagem_urn;
+            }
+
+        } else {
             $request->validate($modelo->rules(), $modelo->messages());
+
+            $modelo->update($request->all());
+
+            if($request->file('imagem')) {
+                Storage::disk('public')->delete($modelo->imagem);
+
+                $imagem = $request->file('imagem');
+                $imagem_urn = $imagem->store('imagens/modelos','public');
+                $modelo->imagem = $imagem_urn;
+            }
+            $modelo->save();
         }
 
-        //remove o arquivo antigo salvo no storage
-        if($request->file('imagem')) {
-            Storage::disk('public')->delete($modelo->imagem);
-        }
-
-        $imagem = $request->file('imagem');
-        $imagem_urn = $imagem->store('imagens/modelos','public');
-
-        $modelo->update([
-            'marca_id' => $request->marca_id,
-            'nome' =>  $request->nome,
-            'imagem' => $imagem_urn,
-            'numero_portas' => $request->numero_portas,
-            'lugares' => $request->lugares,
-            'air_bag'=> $request->air_bag,
-            'abs'=> $request->abs,
-        ]);
         return response()->json($modelo,200);
     }
 

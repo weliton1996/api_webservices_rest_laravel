@@ -23,7 +23,7 @@ class MarcaController extends Controller
     public function index()
     {
         // $marcas = Marca::all();
-        $marca = $this->marca->all();
+        $marca = $this->marca->with('modelos')->get();
         if($marca->isEmpty())return response()->json(['erro'=> 'Nenhum resultado encontrado!'],422);
 
         return response()->json($marca,200);
@@ -37,31 +37,10 @@ class MarcaController extends Controller
      */
     public function store(Request $request)
     {
-       /* teste de validate tradicional
-            dd($request->all());
-            $marca =  Marca::create($request->all());
-            $regras = [
-                'nome' => 'required|unique:marcas',
-                'imagem' => 'required'
-            ];
-            $messages = [
-                'required' => 'O campo :attribute é obrigatório!',
-                'nome.unique' => 'O nome da marca já existe'
-            ];
-            $request->validate($regras,$messages);
-       */
 
         $request->validate($this->marca->rules(),$this->marca->messages());
-        /*  testes de request de image
-            dd($request->nome);
-            dd($request->get('nome'));
-            dd($request->input('nome'));
-            dd($request->imagem);
-            dd($request->file('imagem')->getClientOriginalName());
-        */
 
         $imagem = $request->file('imagem');
-        // $imagem->store('path', local|public);
         $imagem_urn = $imagem->store('imagens','public');
 
         $marca = $this->marca->create([
@@ -80,7 +59,7 @@ class MarcaController extends Controller
      */
     public function show(int $id)
     {
-        $marca = $this->marca->find($id);
+        $marca = $this->marca->with('modelos')->find($id);
         if($marca === null){
             return response()->json(['erro' => 'Recurso pesquisado não existe'], 404);
         }
@@ -105,7 +84,7 @@ class MarcaController extends Controller
 
         if($request->method() === 'PATCH')
         {
-            $regrasDinamicas = array();
+            $regrasDinamicas = [];
 
             //percorrendo todas as regras definidas no Model
             foreach($marca->rules() as $input => $rules)
@@ -117,23 +96,36 @@ class MarcaController extends Controller
                 }
             }
             $request->validate($regrasDinamicas, $marca->messages());
-        } else
-        {
+
+            $marca->update($request->all());
+
+            if($request->file('imagem')) {
+                Storage::disk('public')->delete($marca->imagem);
+                $imagem = $request->file('imagem');
+                $imagem_urn = $imagem->store('imagens','public');
+                $marca->imagem = $imagem_urn;
+            }
+
+            $marca->save();
+
+            return response()->json($marca,200);
+
+        } else {
             $request->validate($marca->rules(), $marca->messages());
+
+            if($request->file('imagem')) {
+                Storage::disk('public')->delete($marca->imagem);
+            }
+
+            $imagem = $request->file('imagem');
+            $imagem_urn = $imagem->store('imagens','public');
+
+            $marca->update([
+                'nome' =>  $request->nome,
+                'imagem' => $imagem_urn
+            ]);
         }
 
-        //remove o arquivo antigo salvo no storage
-        if($request->file('imagem')) {
-            Storage::disk('public')->delete($marca->imagem);
-        }
-
-        $imagem = $request->file('imagem');
-        $imagem_urn = $imagem->store('imagens','public');
-
-        $marca->update([
-            'nome' =>  $request->nome,
-            'imagem' => $imagem_urn
-        ]);
         return response()->json($marca,200);
     }
 
