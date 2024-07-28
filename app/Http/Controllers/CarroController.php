@@ -34,7 +34,7 @@ class CarroController extends Controller
             $this->carroRepository->filtro($request->filtro);
         }
 
-        if($request->has('atributos')){
+        if($request->has('atributo')){
             $this->carroRepository->selectAtributoPesquisa($request->atributo);
         }
 
