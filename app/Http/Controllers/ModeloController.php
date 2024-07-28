@@ -15,7 +15,7 @@ class ModeloController extends Controller
     public function __construct(Modelo $modelo)
     {
         $this->modelo = $modelo;
-        $this->modeloRepository = new ModeloRepository($this->modelo);
+        $this->modeloRepository = new ModeloRepository($modelo);
     }
 
     /**
@@ -27,7 +27,7 @@ class ModeloController extends Controller
     {
 
         if($request->has('atributos_marca')){
-            $atributos_marca = "marca:id,.$request->atributos_marca";
+            $atributos_marca = "marca:id,$request->atributos_marca";
             $this->modeloRepository->selectAtributosRegistrosRelacionados($atributos_marca);
         } else {
             $this->modeloRepository->selectAtributosRegistrosRelacionados("marca");

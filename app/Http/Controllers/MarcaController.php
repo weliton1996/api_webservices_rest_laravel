@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\Marca;
 use App\Repositories\MarcaRepository;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -16,7 +17,7 @@ class MarcaController extends Controller
     public function __construct(Marca $marca)
     {
         $this->marca = $marca;
-        $this->marcaRepository = new MarcaRepository($this->marca);
+        $this->marcaRepository = new MarcaRepository($marca);
     }
     /**
      * Exibir uma listagem do recurso.
@@ -26,7 +27,7 @@ class MarcaController extends Controller
     public function index(Request $request)
     {
         if($request->has('atributos_modelos')){
-            $atributos_modelo = "modelos:id,.$request->atributos_modelos";
+            $atributos_modelo = "modelos:id,$request->atributos_modelos";
             $this->marcaRepository->selectAtributosRegistrosRelacionados($atributos_modelo);
         } else {
             $this->marcaRepository->selectAtributosRegistrosRelacionados('modelos');
