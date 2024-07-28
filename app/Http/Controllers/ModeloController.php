@@ -2,22 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\Controller;
 use App\Models\Modelo;
+use App\Repositories\ModeloRepository;
 use Illuminate\Http\Request;
-use PHPUnit\Framework\Constraint\IsEmpty;
+use Illuminate\Support\Facades\Storage;
 
 class ModeloController extends Controller
 {
-    /**
-     *
-     * @var Modelo $modelo
-     */
     protected Modelo $modelo;
+    protected ModeloRepository $modeloRepository;
     public function __construct(Modelo $modelo)
     {
         $this->modelo = $modelo;
+        $this->modeloRepository = new ModeloRepository($this->modelo);
     }
 
     /**
@@ -27,35 +25,29 @@ class ModeloController extends Controller
      */
     public function index(Request $request)
     {
-        $modelos = [];
 
         if($request->has('atributos_marca')){
-            $atributos_marca = $request->atributos_marca;
-            $modelos = $this->modelo->with('marca:id,'.$atributos_marca);
+            $atributos_marca = "marca:id,.$request->atributos_marca";
+            $this->modeloRepository->selectAtributosRegistrosRelacionados($atributos_marca);
         } else {
-            $modelos = $this->modelo->with('marca');
+            $this->modeloRepository->selectAtributosRegistrosRelacionados("marca");
         }
 
         if($request->has('filtro')){
-            $filtros = explode(';',$request->filtro);
-            foreach($filtros as $key => $condicao){
-                $parametros = explode(':',$condicao);
-                $modelos = $modelos->where($parametros[0], $parametros[1], $parametros[2]);
-            }
-
+            $this->modeloRepository->filtro($request->filtro);
         }
 
         if($request->has('atributos')){
-            $atributos = $request->atributos;
-            $modelos = $modelos->selectRaw($atributos)->get();
-        } else {
-            $modelos = $modelos->get();
+            $this->modeloRepository->selectAtributoPesquisa($request->atributos);
         }
 
-        if(!$modelos->count()>0){
+        $modelo = $this->modeloRepository->getResultado();
+
+        if($modelo->isEmpty()){
             return response()->json(['erro' => 'Nenhum resultado encontrado!'], 404);
         }
-        return response()->json($modelos,200);
+
+        return response()->json($modelo,200);
     }
 
 
