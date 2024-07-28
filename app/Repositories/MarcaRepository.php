@@ -2,13 +2,13 @@
 
 namespace App\Repositories;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 class MarcaRepository {
-    protected Model $model;
-
+    protected Builder $model;
     public function __construct(Model $model) {
-        $this->model = $model;
+        $this->model = $model->newQuery();
     }
 
     public function selectAtributosRegistrosRelacionados($atributos) {
@@ -17,17 +17,17 @@ class MarcaRepository {
 
     public function filtro($filtros) {
         $filtros = explode(';',$filtros);
-        foreach($filtros as $key => $condicao){
-            $parametros = explode(':',$condicao);
-            $this->model->where($parametros[0], $parametros[1], $parametros[2]);
+        foreach($filtros as $condicao) {
+            $parametro = explode(':',$condicao);
+            $this->model->where($parametro[0], $parametro[1], $parametro[2]);
         }
     }
 
     public function selectAtributoPesquisa($atributos) {
-        $this->model->selectRaw($atributos)->get();
+        $this->model->selectRaw($atributos);
     }
 
-    public function get() {
+    public function getResultado() {
         return $this->model->get();
     }
 
