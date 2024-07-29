@@ -3,85 +3,111 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cliente;
-use App\Http\Requests\StoreClienteRequest;
-use App\Http\Requests\UpdateClienteRequest;
+use Illuminate\Http\Request;
+use App\Repositories\ClienteRepository;
 
 class ClienteController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
+    protected Cliente $cliente;
+    protected ClienteRepository $clienteRepository;
+
+    public function __construct(Cliente $cliente)
     {
-        //
-        return ['Chegamos até aqui!'=> 'Sim, chegamos.'];
+        $this->cliente = $cliente;
+        $this->clienteRepository = new ClienteRepository($cliente);
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Display a listing of the resource.
      *
+     * @param Request $request
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function index(Request $request)
     {
-        //
+
+        if($request->has('filtro')){
+            $this->clienteRepository->filtro($request->filtro);
+        }
+
+        if($request->has('atributos')){
+            $this->clienteRepository->selectAtributoPesquisa($request->atributos);
+        }
+
+        $cliente = $this->clienteRepository->getResultado();
+
+        if($cliente->isEmpty()){
+            return response()->json(['erro' => 'Nenhum resultado encontrado!'], 404);
+        }
+
+        return response()->json($cliente, 200);
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \App\Http\Requests\StoreClienteRequest  $request
+     * @param  Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(StoreClienteRequest $request)
+    public function store(Request $request)
     {
-        //
+        $request->validate($this->cliente->rules(),$this->cliente->messages());
+
+        $cliente = $this->cliente->create($request->all());
+
+        return response()->json($cliente,201);
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Cliente  $cliente
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Cliente $cliente)
+    public function show(int $id)
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Cliente  $cliente
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Cliente $cliente)
-    {
-        //
+        $cliente = $this->cliente->find($id);
+        if($cliente === null){
+            return response()->json(['erro' => 'Recurso pesquisado não existe'], 404);
+        }
+        return response()->json($cliente,200);
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  \App\Http\Requests\UpdateClienteRequest  $request
-     * @param  \App\Models\Cliente  $cliente
+     * @param  Request  $request
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
-    public function update(UpdateClienteRequest $request, Cliente $cliente)
+    public function update(Request $request, $id)
     {
-        //
+        $cliente = $this->cliente->find($id);
+        if($cliente === null){
+            return response()->json(['erro' => 'Impossível realizar a atualização. O recurso solicitado não existe.'],404);
+        }
+        $request->validate($cliente->rules(), $cliente->messages());
+
+        $cliente->update($request->all());
+
+        return response()->json($cliente,200);
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Cliente  $cliente
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Cliente $cliente)
+    public function destroy($id)
     {
-        //
+        $cliente = $this->cliente->find($id);
+
+        if($cliente === null){
+            return response()->json(['erro' => 'Impossível realizar a exclusão. O recurso solicitado não existe.'],404);
+        }
+
+        $cliente->delete();
+        return response()->json(['msg' => 'O cliente foi removida com sucesso!'],200);
     }
 }
