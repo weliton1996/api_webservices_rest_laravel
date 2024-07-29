@@ -31,10 +31,6 @@ class Carro extends Model
         ];
     }
 
-    public function marca() {
-        return $this->belongsTo('App\Models\Marca');
-    }
-
     public function modelo() {
         return $this->belongsTo('App\Models\Modelo');
     }
