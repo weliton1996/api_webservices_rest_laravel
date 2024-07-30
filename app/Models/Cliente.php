@@ -22,4 +22,8 @@ class Cliente extends Model
             'nome.required' => 'A nome é obrigatória.',
         ];
     }
+
+    public function locacoes() {
+        return $this->hasMany('App\Models\Locacao', 'cliente_id');
+    }
 }

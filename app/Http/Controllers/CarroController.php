@@ -23,11 +23,26 @@ class CarroController extends Controller
      */
     public function index(Request $request)
     {
-        if($request->has('atributos_modelo')){
-            $atributos_modelo = "modelo:id,$request->atributos_modelo";
-            $this->carroRepository->selectAtributosRegistrosRelacionados($atributos_modelo);
+        // Verifica se há atributos para 'carro' e 'cliente'
+        if ($request->has('atributos_modelo')) {
+            $atributos_modelo = 'modelo:id,' . $request->atributos_modelo;
+            $atributosRelacionados[] = $atributos_modelo;
         } else {
-            $this->carroRepository->selectAtributosRegistrosRelacionados('modelo');
+            $atributosRelacionados[] = 'modelo';
+        }
+
+        if ($request->has('atributos_locacoes')) {
+            $atributos_locacoes = 'locacoes:id,' . $request->atributos_locacoes;
+            $atributosRelacionados[] = $atributos_locacoes;
+        } else {
+            $atributosRelacionados[] = 'locacoes';
+        }
+
+        // Configura os atributos relacionados no repositório
+        if(isset($atributosRelacionados)) {
+            $this->carroRepository->selectAtributosRegistrosRelacionados($atributosRelacionados);
+        } else {
+            $this->carroRepository->selectAtributosRegistrosRelacionados(['modelo','locacoes']);
         }
 
         if($request->has('filtro')){

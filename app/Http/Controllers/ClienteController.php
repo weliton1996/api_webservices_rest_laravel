@@ -25,6 +25,12 @@ class ClienteController extends Controller
      */
     public function index(Request $request)
     {
+        if($request->has('atributos_locacoes')){
+            $atributos_locacoes = "locacoes:id,$request->atributos_locacoes";
+            $this->clienteRepository->selectAtributosRegistrosRelacionados($atributos_locacoes);
+        } else {
+            $this->clienteRepository->selectAtributosRegistrosRelacionados('locacoes');
+        }
 
         if($request->has('filtro')){
             $this->clienteRepository->filtro($request->filtro);
