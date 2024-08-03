@@ -51,6 +51,7 @@ class AuthController extends Controller
      */
     public function logout()
     {
+        //É preciso que o lado do cliente encaminhe um token jwt válido.
         auth()->logout();
 
         return response()->json(['message' => 'Successfully logged out']);
@@ -63,6 +64,7 @@ class AuthController extends Controller
      */
     public function refresh()
     {
+        //É preciso que o lado do cliente encaminhe um token jwt válido.
         return $this->respondWithToken(auth()->refresh());
     }
 
