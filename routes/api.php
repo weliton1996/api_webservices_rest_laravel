@@ -22,12 +22,11 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 // Route::resource('cliente', 'App\http\Controllers\ClienteController');
 
 //Método resource cria somente os métodos index, store, show, update e destroy
-Route::apiResource('cliente', 'ClienteController');
-
-Route::apiResource('carro', 'CarroController');
-Route::apiResource('locacao', 'LocacaoController');
-Route::apiResource('marca', 'MarcaController');
-Route::apiResource('modelo', 'ModeloController');
+Route::apiResource('cliente', 'ClienteController')->middleware('jwt.auth');
+Route::apiResource('carro', 'CarroController')->middleware('jwt.auth');
+Route::apiResource('locacao', 'LocacaoController')->middleware('jwt.auth');
+Route::apiResource('marca', 'MarcaController')->middleware('jwt.auth');
+Route::apiResource('modelo', 'ModeloController')->middleware('jwt.auth');
 
 Route::post('login', 'AuthController@login');
 Route::post('logout', 'AuthController@logout');
